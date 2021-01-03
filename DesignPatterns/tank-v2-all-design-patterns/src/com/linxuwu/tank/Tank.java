@@ -14,20 +14,24 @@ import java.util.Random;
 @Getter
 @Setter
 public class Tank {
-    private int x, y;
-    private Dir dir = Dir.DOWN;
+
+    int x, y;
+    Dir dir = Dir.DOWN;
     private static final int SPEED = 2;
 
     Rectangle rect = new Rectangle();
 
     private boolean moving = true;
-    private TankFrame tf = null;
+    TankFrame tf = null;
     private Random random = new Random();
-    private Group group = Group.BAD;
+    Group group = Group.BAD;
     private boolean living = true;
 
     public static final int WIDTH = ResourceMgr.goodTankD.getWidth();
     public static final int HEIGHT = ResourceMgr.goodTankD.getHeight();
+
+
+    FireStrategy fireStrategy;
 
     public Tank(int x, int y, Dir dir, Group group, TankFrame tf) {
         this.x = x;
@@ -40,6 +44,15 @@ public class Tank {
         rect.y = this.y;
         rect.width = WIDTH;
         rect.height = HEIGHT;
+
+        if(group == Group.GOOD) {
+            /**
+             * Class.forName()....配置文件
+             */
+            fireStrategy = new FourDirFireStrategy();
+        }else {
+            fireStrategy = new DefaultStrategy();
+        }
     }
 
     public void paint(Graphics g) {
@@ -87,7 +100,7 @@ public class Tank {
 
 
         if(this.group == Group.BAD && random.nextInt(100) > 95){
-            this.fire();
+            this.fire(fireStrategy);
         }
         if(this.group == Group.BAD && random.nextInt(10) > 8) {
             randomDir();
@@ -113,10 +126,13 @@ public class Tank {
     }
 
 
-    public void fire() {
-        int bX = this.x + Tank.WIDTH/2 - Bullet.WIDTH/2;
-        int bY = this.y + Tank.HEIGHT/2 - Bullet.HEIGHT/2;
-        tf.bullets.add(new Bullet(bX, bY, this.dir, this.group, tf));
+    /**
+     * fire(FireStrategy s) -> 每次调用，都需要new，因此，应该把DefaultStrategy -> Singleton
+     * 成员变量
+     * @param fireStrategy
+     */
+    public void fire(FireStrategy fireStrategy) {
+        fireStrategy.fire(this);
     }
 
     public void die() {
