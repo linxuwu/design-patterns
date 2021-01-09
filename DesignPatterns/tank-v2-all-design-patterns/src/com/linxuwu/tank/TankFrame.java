@@ -147,7 +147,7 @@ public class TankFrame extends Frame {
                     bD = false;
                     break;
                 case KeyEvent.VK_CONTROL:
-                    tank.fire();
+                    tank.fire(tank.fireStrategy);
                     break;
 
             }
